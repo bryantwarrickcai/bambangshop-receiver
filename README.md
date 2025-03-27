@@ -85,5 +85,11 @@ This is the place for you to write reflections:
 ### Mandatory (Subscriber) Reflections
 
 #### Reflection Subscriber-1
+1. The main difference between `RwLock` and `Mutex` is that `RwLock` allows multiple readers at a time, but only one writer, whereas `Mutex` only allows one thread at a time, either read or write. In this case of notification system, `RwLock` is necessary because many observers will need to read the list of notifications simultaneously. `RwLock` allows multiple threads to read the data concurrently without blocking each other, which increases performance. If `Mutex` was used instead, only one observer can have access to the data at a time (whether read or write). This would significantly decrease the performance in read-heavy scenarios (where there are many readers) like in this case.
+2. In Rust, `static` variables are immutable by default, and mutation requires explicit handling for safety reasons. If you declare a static variable without `lazy_static`, the value must be determinable at compile-time. In our case, `static ref NOTIFICATIONS: RwLock<Vec<Notification>> = RwLock::new(vec![]);`, this will not work without `lazy_static` because this involves creating a new `Vec<Notification>` object, which requires runtime evaluation (and cannot be determined at compile-time). `lazy_static` allows you to define a static variable that is initialized lazily at runtime.  
+
+   Unlike in Java, Rust's design philosophy around static variables is deeply rooted in its principles of safety, concurrency, and default immutability. Rust's philosophy states that variables should only be mutable when explicitly requested to prevent unintended side effects.  
+
+   Java, on the other hand, allows direct mutation of objects because they use a different memory model to manage concurrency. However, this approach may lead to subtle bugs and performance issues if not carefully managed.
 
 #### Reflection Subscriber-2
